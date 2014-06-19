@@ -6,7 +6,7 @@
         <Button Name="btnTest" Content="Load test data" Tag="meh" Width="100" Height="25" Click="btnTest_Click" />
         <Button Name="btnTrain" Content="Load train data" Tag="meh" Width="100" Height="25" Click="btnTrain_Click" Margin="208,177,209,117" />
     
-        <Image Source="image"/>
+        <Image x:Name="image" HorizontalAlignment="Left" Height="100" Margin="62,86,0,0" VerticalAlignment="Top" Width="100"/>
     </Grid>
     
 </Window>

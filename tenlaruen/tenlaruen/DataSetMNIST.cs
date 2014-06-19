@@ -24,6 +24,11 @@ namespace tenlaruen
             return testData[index];
         }
 
+        public ImageMNIST GetTrainingImage(uint index)
+        {
+            return trainingData[index];
+        }
+
         public void LoadTestData()
         {
             try

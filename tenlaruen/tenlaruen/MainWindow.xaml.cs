@@ -34,12 +34,17 @@ namespace tenlaruen
         {
             data.LoadTestData();
             MessageBox.Show("MNIST test data loaded");
+            image.Source = data.GetTestImage(666).GetImage();
+
+
         }
 
         private void btnTrain_Click(object sender, RoutedEventArgs e)
         {
             data.LoadTrainingData();
             MessageBox.Show("MNIST training data loaded");
+
+            image.Source = data.GetTrainingImage(666).GetImage();
         }
     }
 }

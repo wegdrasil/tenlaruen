@@ -1,11 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Drawing;
 using System.Windows.Media.Imaging;
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace tenlaruen
 {
@@ -13,6 +15,7 @@ namespace tenlaruen
     {
         public byte[][] pixels;
         public byte label;
+        public BitmapSource image;
         
         public ImageMNIST(byte[][] pixels, byte label)
         {
@@ -25,24 +28,35 @@ namespace tenlaruen
                     this.pixels[i][j] = pixels[i][j];
 
             this.label = label;
+
+            byte[] imageData = new byte[28 * 28];
+
+            for (int i = 0; i < 28; ++i)
+            {
+                for (int j = 0; j < 28; ++j)
+                {
+                    imageData[(i * 28) + j] = pixels[i][j];
+                }
+            }
+
+            var width = 28;
+            var height = 28;
+            var dpiX = 96d;
+            var dpiY = 96d;
+            var pixelFormat = PixelFormats.Gray8;
+            var bytesPerPixel = 1;
+            var stride = bytesPerPixel * width;
+
+            image = BitmapSource.Create(width, height, dpiX, dpiY, pixelFormat, null, imageData, stride);
+
         }
 
-        public BitmapImage LoadImage(byte[] imageData)
+        public BitmapSource GetImage()
         {
-            if (imageData == null || imageData.Length == 0) return null;
-            var image = new BitmapImage();
-            using (var mem = new MemoryStream(imageData))
-            {
-                mem.Position = 0;
-                image.BeginInit();
-                image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.UriSource = null;
-                image.StreamSource = mem;
-                image.EndInit();
-            }
-            image.Freeze();
             return image;
         }
+
+
+
     }
 }
