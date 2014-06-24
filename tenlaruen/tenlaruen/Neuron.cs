@@ -7,6 +7,7 @@ namespace tenlaruen
     {
         public List<Connection> connections;
         public double output;
+        public double sigma;
 
         public Neuron()
         {
