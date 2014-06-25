@@ -16,14 +16,12 @@ using System.Windows.Shapes;
 
 namespace tenlaruen
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         DataSetMNIST data;
         NeuralNetwork net;
-       
+        int currentChar;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -35,23 +33,23 @@ namespace tenlaruen
             //init network
             net = new NeuralNetwork(3);      //neural newtwor with 3 layers
 
-            net.layers.Add(new Layer(2));    //input layer with 2 neurons
-            net.layers.Add(new Layer(3));    //hidden layer with 3 neurons 
-            net.layers.Add(new Layer(4));    //output layer with 4 neurons
+            net.layers.Add(new Layer(784));    //input layer with 784 neurons
+            net.layers.Add(new Layer(100));    //hidden layer with 100 neurons 
+            net.layers.Add(new Layer(10));    //output layer with 10 neurons
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 784; i++)
             {
                 net.layers[0].neurons.Add(new Neuron());
                 net.layers[0].neurons[i].AddConnection(new Neuron(), (1.0 - (-1.0) * rnd.NextDouble() + (-1.0)));
                 net.layers[0].neurons[i].connections[0].neuron.output = 1.0f;
             }
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 100; i++)
             {
                 net.layers[1].neurons.Add(new Neuron());
                 net.layers[1].neurons[i].AddConnection(new Neuron(), (1.0 - (-1.0) * rnd.NextDouble() + (-1.0)));
                 net.layers[1].neurons[i].connections[0].neuron.output = 1.0f;
             }
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 10; i++)
             {
                 net.layers[2].neurons.Add(new Neuron());
                 net.layers[2].neurons[i].AddConnection(new Neuron(), (1.0 - (-1.0) * rnd.NextDouble() + (-1.0)));
@@ -60,79 +58,112 @@ namespace tenlaruen
 
             //output -> hidden
             double r = 1.0;
-            net.MakeConnection(2, 0, 1, 0, -r, r, rnd);
-            net.MakeConnection(2, 0, 1, 1, -r, r, rnd);
-            net.MakeConnection(2, 0, 1, 2, -r, r, rnd);
 
-            net.MakeConnection(2, 1, 1, 0, -r, r, rnd);
-            net.MakeConnection(2, 1, 1, 1, -r, r, rnd);
-            net.MakeConnection(2, 1, 1, 2, -r, r, rnd);
-
-            net.MakeConnection(2, 2, 1, 0, -r, r, rnd);
-            net.MakeConnection(2, 2, 1, 1, -r, r, rnd);
-            net.MakeConnection(2, 2, 1, 2, -r, r, rnd);
-
-            net.MakeConnection(2, 3, 1, 0, -r, r, rnd);
-            net.MakeConnection(2, 3, 1, 1, -r, r, rnd);
-            net.MakeConnection(2, 3, 1, 2, -r, r, rnd);
-
+            for (int j = 0; j < 10; j++ )
+                for (int i = 0; i < 100; i++)
+                    net.MakeConnection(2, j, 1, i, -r, r, rnd);
+            
             //hidden -> input
-            net.MakeConnection(1, 0, 0, 0, -r, r, rnd);
-            net.MakeConnection(1, 0, 0, 1, -r, r, rnd);
-
-            net.MakeConnection(1, 1, 0, 0, -r, r, rnd);
-            net.MakeConnection(1, 1, 0, 1, -r, r, rnd);
-
-            net.MakeConnection(1, 2, 0, 0, -r, r, rnd);
-            net.MakeConnection(1, 2, 0, 1, -r, r, rnd);
-
-            double[] input0 = new double[] { 0.0, 0.0 };
-            double[] input1 = new double[] { 0.0, 1.0 };
-            double[] input2 = new double[] { 1.0, 0.0 };
-            double[] input3 = new double[] { 1.0, 1.0 };
-
-            for (int i = 0; i < 100000; i++)
-            {
-                int a = rnd.Next(4);
-                switch (a)
-                {
-                    case 0:
-                        net.Backpropagate(net.Calculate(input0), new double[] { +1.0, -1.0, -1.0, -1.0 });
-                        break;
-                    case 1:
-                        net.Backpropagate(net.Calculate(input1), new double[] { -1.0, +1.0, -1.0, -1.0 });
-                        break;
-                    case 2:
-                        net.Backpropagate(net.Calculate(input2), new double[] { -1.0, -1.0, +1.0, -1.0 });
-                        break;
-                    case 3:
-                        net.Backpropagate(net.Calculate(input3), new double[] { -1.0, -1.0, -1.0, +1.0 });
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            double[] o = new double[4];
-            o = net.Calculate(input0);
-
+            for (int j = 0; j < 100; j++)
+                for (int i = 0; i < 784; i++)
+                    net.MakeConnection(1, j, 0, i, -r, r, rnd);
+            
         }
 
-        private void btnTest_Click(object sender, RoutedEventArgs e)
+        private void btnLoadTrain_Click(object sender, RoutedEventArgs e)
+        {
+            data.LoadTrainingData();
+            MessageBox.Show("Wczytano dane treningowe.");
+        }
+
+        private void btnLoadTest_Click(object sender, RoutedEventArgs e)
         {
             data.LoadTestData();
-            MessageBox.Show("MNIST test data loaded");
-            image.Source = data.GetTestImage(666).GetImage();
+            MessageBox.Show("Wczytano dane testowe.");
 
 
         }
 
         private void btnTrain_Click(object sender, RoutedEventArgs e)
         {
-            data.LoadTrainingData();
-            MessageBox.Show("MNIST training data loaded");
+            if (data.trainingData == null || data.testData == null)
+            {
+                MessageBox.Show("Zanim zaczniesz trenować sieć, wczytaj dane.");
+                return;
+            }
+            else
+            {
+                Random rnd = new Random();
+                MessageBox.Show("Trwa uczenie sieci.");
 
-            image.Source = data.GetTrainingImage(9530).GetImage();
+                for (int j = 0; j < 250; j++)
+                {
+                    int i = rnd.Next(60000);
+                    int a = data.GetTrainingImage(i).label;
+                    switch (a)
+                    {
+                        case 0:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { +1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0 });
+                            break;
+                        case 1:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, +1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0 });
+                            break;
+                        case 2:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, -1.0, +1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0 });
+                            break;
+                        case 3:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, -1.0, -1.0, +1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0 });
+                            break;
+                        case 4:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, -1.0, -1.0, -1.0, +1.0, -1.0, -1.0, -1.0, -1.0, -1.0 });
+                            break;
+                        case 5:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, -1.0, -1.0, -1.0, -1.0, +1.0, -1.0, -1.0, -1.0, -1.0 });
+                            break;
+                        case 6:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, +1.0, -1.0, -1.0, -1.0 });
+                            break;
+                        case 7:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, +1.0, -1.0, -1.0 });
+                            break;
+                        case 8:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, +1.0, -1.0 });
+                            break;
+                        case 9:
+                            net.Backpropagate(net.Calculate(data.GetTrainingImage(i).GetNetInput()), new double[] { -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, +1.0 });
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                MessageBox.Show("Proces uczenia sieci neuronowej przebiegł pomyślnie.");
+
+            }
+        }
+
+        private void btnTest_Click(object sender, RoutedEventArgs e)
+        {
+            if (data.trainingData == null || data.testData == null)
+            {
+                MessageBox.Show("Zanim zaczniesz testować sieć, wczytaj dane.");
+                return;
+            }
+            else
+            {
+                double[] o = new double[10];
+                o = net.Calculate(data.GetTestImage(currentChar).GetNetInput());
+
+                double maxValue = o.Max();
+                int maxIndex = o.ToList().IndexOf(maxValue);
+
+                bestGuess0.Text = maxIndex.ToString();
+                bestGuessValue.Text = o[maxIndex].ToString("0.000");
+                image.Source = data.GetTestImage(currentChar).GetImage();
+                currentChar++;
+            }
+
         }
     }
 }

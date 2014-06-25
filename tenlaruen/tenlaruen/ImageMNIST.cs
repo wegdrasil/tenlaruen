@@ -16,7 +16,8 @@ namespace tenlaruen
         public byte[][] pixels;
         public byte label;
         public BitmapSource image;
-        
+        public double[] netInput;
+
         public ImageMNIST(byte[][] pixels, byte label)
         {
             this.pixels = new byte[28][];
@@ -30,12 +31,17 @@ namespace tenlaruen
             this.label = label;
 
             byte[] imageData = new byte[28 * 28];
+            netInput = new double[784];
 
             for (int i = 0; i < 28; ++i)
             {
                 for (int j = 0; j < 28; ++j)
                 {
                     imageData[(i * 28) + j] = pixels[i][j];
+                    if (pixels[i][j] >= 128)
+                        netInput[(i * 28) + j] = 1.0f;
+                    else
+                        netInput[(i * 28) + j] = 0.0f;
                 }
             }
 
@@ -54,6 +60,11 @@ namespace tenlaruen
         public BitmapSource GetImage()
         {
             return image;
+        }
+
+        public double[] GetNetInput()
+        {
+            return netInput;
         }
 
 

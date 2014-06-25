@@ -9,28 +9,28 @@ namespace tenlaruen
 {
     class DataSetMNIST
     {
-        ImageMNIST[] trainingData;
-        ImageMNIST[] testData;
+        public ImageMNIST[] trainingData;
+        public ImageMNIST[] testData;
 
 
         public DataSetMNIST()
         {
-            trainingData = new ImageMNIST[60000];
-            testData = new ImageMNIST[10000];
         }
 
-        public ImageMNIST GetTestImage(uint index)
+        public ImageMNIST GetTestImage(int index)
         {
             return testData[index];
         }
 
-        public ImageMNIST GetTrainingImage(uint index)
+        public ImageMNIST GetTrainingImage(int index)
         {
             return trainingData[index];
         }
 
         public void LoadTestData()
         {
+
+            testData = new ImageMNIST[10000];
             try
             {
                 FileStream ifsLabels = new FileStream(@"t10k-labels.idx1-ubyte", FileMode.Open);
@@ -82,6 +82,7 @@ namespace tenlaruen
 
         public void LoadTrainingData()
         {
+            trainingData = new ImageMNIST[60000];
             try
             {
                 FileStream ifsLabels = new FileStream(@"train-labels.idx1-ubyte", FileMode.Open);
